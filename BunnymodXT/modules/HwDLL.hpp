@@ -422,6 +422,10 @@ protected:
 	struct Cmd_BXT_TAS_Check_Position;
 	struct Cmd_BXT_CH_Set_Health;
 	struct Cmd_BXT_Set_Angles;
+	struct Cmd_BXT_MarioCam_Left;
+	struct Cmd_BXT_MarioCam_Right;
+	struct Cmd_BXT_MarioCam_Reset;
+	struct Cmd_BXT_MarioCam_SetHome;
 	struct Cmd_BXT_CH_Set_Armor;
 	struct Cmd_BXT_CH_Set_Origin;
 	struct Cmd_BXT_CH_Set_Origin_Offset;

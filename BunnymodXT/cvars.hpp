@@ -68,6 +68,8 @@
 	X(bxt_disable_particles, "0") \
 	X(bxt_fix_changelevel_in_coop, "0") \
 	X(bxt_fire_on_stuck, "") \
+	X(bxt_mariocam, "0") \
+	X(bxt_mariocam_home, "0 180") \
 	X(bxt_autojump, "0") \
 	X(bxt_autojump_priority, "1") \
 	X(bxt_bhopcap, "1") \

@@ -1,4 +1,28 @@
-# Bunnymod XT
+# Bunnymod XT (Mario cam fork)
+
+This is [Bunnymod XT](https://github.com/YaLTeR/BunnymodXT) with the Mario cam controls for blindfolded runs added: turning the view exactly 45 degrees left or right, and a reset to the view you get when you spawn in c1a0 (looking into the door). Everything else is Bunnymod XT as it is.
+
+The controls do nothing until you turn them on with `bxt_mariocam 1`, so with `bxt_mariocam 0` (the default) this is plain Bunnymod XT, for the Vanilla category. Bunnymod XT records the cvar and every command in your demos, so they show which way you played.
+
+| Command or cvar | What it does |
+| --- | --- |
+| `bxt_mariocam 0/1` | Turns the Mario cam controls off (default) or on. |
+| `bxt_mariocam_left` | Turns the view 45 degrees left (the pitch stays). |
+| `bxt_mariocam_right` | Turns the view 45 degrees right (the pitch stays). |
+| `bxt_mariocam_reset` | Sets the view to the home view. |
+| `bxt_mariocam_home "<pitch> <yaw>"` | The home view, `"0 180"` by default: c1a0's spawn. |
+| `bxt_mariocam_sethome` | Makes the current view the home view (and prints the line to keep it in your config). |
+
+The turns use the same rounding the game uses for `+left` / `+right`, so 45 degree turns stay exact: eight of them bring you back to where you started.
+
+For example, in a config you `exec` before the run:
+
+    bxt_mariocam 1
+    bind home bxt_mariocam_reset
+    bind leftarrow bxt_mariocam_left
+    bind rightarrow bxt_mariocam_right
+
+Downloads: [Releases](../../releases/latest). Install it like Bunnymod XT (below), and keep the launcher from updating it back to the official build: in the `.bat` that starts the game, put `::` in front of the line that calls `update.bat`.
 
 ### VAC BAN WARNING: Do NOT connect to servers with this injected, or you might get VAC banned!
 

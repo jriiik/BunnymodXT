@@ -61,7 +61,7 @@ jobs:
       uses: softprops/action-gh-release@v3
       with:
         files: 2-BunnymodXT-${{ runner.os }}.7z
-        draft: true
+        draft: false
         fail_on_unmatched_files: true
 
   build-flatpak:
@@ -157,5 +157,5 @@ jobs:
       uses: softprops/action-gh-release@v3
       with:
         files: ${{ matrix.archive-filename }}
-        draft: true
+        draft: false
         fail_on_unmatched_files: true

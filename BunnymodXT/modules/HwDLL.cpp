@@ -3116,6 +3116,98 @@ struct HwDLL::Cmd_BXT_Set_Angles
 	}
 };
 
+// Mario cam: the view controls of blindfolded runs (45 degree snaps and a reset to a home view).
+// They do nothing while bxt_mariocam is 0, so the Vanilla category plays as plain Bunnymod XT.
+static bool MarioCamEnabled()
+{
+	if (CVars::bxt_mariocam.GetBool())
+		return true;
+
+	HwDLL::GetInstance().ORIG_Con_Printf("bxt_mariocam is 0: set it to 1 to use the Mario cam controls.\n");
+	return false;
+}
+
+static void MarioCamTurn(double degrees)
+{
+	auto &cl = ClientDLL::GetInstance();
+	if (!MarioCamEnabled() || !cl.pEngfuncs)
+		return;
+
+	float angles[3];
+	cl.pEngfuncs->GetViewAngles(angles);
+	// The same anglemod the client applies after +left / +right, so 45 degrees stays exact on the 16-bit angle grid.
+	angles[1] = static_cast<float>(HLStrafe::AngleModDeg(angles[1] + degrees));
+	cl.pEngfuncs->SetViewAngles(angles);
+}
+
+struct HwDLL::Cmd_BXT_MarioCam_Left
+{
+	NO_USAGE();
+
+	static void handler()
+	{
+		MarioCamTurn(45.0);
+	}
+};
+
+struct HwDLL::Cmd_BXT_MarioCam_Right
+{
+	NO_USAGE();
+
+	static void handler()
+	{
+		MarioCamTurn(-45.0);
+	}
+};
+
+struct HwDLL::Cmd_BXT_MarioCam_Reset
+{
+	NO_USAGE();
+
+	static void handler()
+	{
+		auto &cl = ClientDLL::GetInstance();
+		if (!MarioCamEnabled() || !cl.pEngfuncs)
+			return;
+
+		float pitch, yaw;
+		std::istringstream home(CVars::bxt_mariocam_home.GetString());
+		if (!(home >> pitch >> yaw)) {
+			HwDLL::GetInstance().ORIG_Con_Printf("bxt_mariocam_home must be \"<pitch> <yaw>\", for example \"0 180\".\n");
+			return;
+		}
+
+		float angles[3];
+		angles[0] = pitch;
+		angles[1] = static_cast<float>(HLStrafe::AngleModDeg(yaw));
+		angles[2] = 0.0f;
+		cl.pEngfuncs->SetViewAngles(angles);
+	}
+};
+
+struct HwDLL::Cmd_BXT_MarioCam_SetHome
+{
+	NO_USAGE();
+
+	static void handler()
+	{
+		auto &hw = HwDLL::GetInstance();
+		auto &cl = ClientDLL::GetInstance();
+		if (!cl.pEngfuncs)
+			return;
+
+		float angles[3];
+		cl.pEngfuncs->GetViewAngles(angles);
+
+		// Nine digits give the floats back exactly.
+		std::ostringstream out;
+		out << std::setprecision(9) << angles[0] << ' ' << angles[1];
+		const auto value = out.str();
+		hw.SetCVarValue(CVars::bxt_mariocam_home, value.c_str());
+		hw.ORIG_Con_Printf("bxt_mariocam_home is now \"%s\". To keep it, put this line in your config: bxt_mariocam_home \"%s\"\n", value.c_str(), value.c_str());
+	}
+};
+
 struct HwDLL::Cmd_BXT_CH_Get_Velocity
 {
 	NO_USAGE();
@@ -5811,6 +5903,8 @@ void HwDLL::RegisterCVarsAndCommandsIfNeeded()
 	RegisterCVar(CVars::bxt_ch_checkpoint_with_vel);
 	RegisterCVar(CVars::bxt_ch_checkpoint_onground_only);
 	RegisterCVar(CVars::_bxt_ch_checkpoint_reset_on_disconnect);
+	RegisterCVar(CVars::bxt_mariocam);
+	RegisterCVar(CVars::bxt_mariocam_home);
 
 	if (ORIG_R_SetFrustum && scr_fov_value)
 	{
@@ -5882,6 +5976,10 @@ void HwDLL::RegisterCVarsAndCommandsIfNeeded()
 		Cmd_BXT_Set_Angles,
 		Handler<float, float>,
 		Handler<float, float, float>>("bxt_set_angles");
+	wrapper::Add<Cmd_BXT_MarioCam_Left, Handler<>>("bxt_mariocam_left");
+	wrapper::Add<Cmd_BXT_MarioCam_Right, Handler<>>("bxt_mariocam_right");
+	wrapper::Add<Cmd_BXT_MarioCam_Reset, Handler<>>("bxt_mariocam_reset");
+	wrapper::Add<Cmd_BXT_MarioCam_SetHome, Handler<>>("bxt_mariocam_sethome");
 	wrapper::Add<Cmd_BXT_Get_Server_Time, Handler<>>("bxt_get_server_time");
 	wrapper::Add<Cmd_BXT_Get_SteamID_From_Demo, Handler<>>("bxt_get_steamid_from_demo");
 	wrapper::Add<
